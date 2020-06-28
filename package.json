@@ -1,0 +1,11 @@
+{
+  "name": "learning-serverless-resizer-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Kanji Tanaka <sumireminami@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^1.74.0",
+    "serverless-rust": "^0.3.8"
+  }
+}
