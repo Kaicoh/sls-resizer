@@ -47,3 +47,9 @@ impl Client {
         self.0.put_object(input).await.unwrap();
     }
 }
+
+impl Default for Client {
+    fn default() -> Self {
+        Self::new()
+    }
+}
