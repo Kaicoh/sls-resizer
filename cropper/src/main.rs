@@ -1,8 +1,8 @@
 use failure::Error;
+use image::GenericImageView;
 use image::ImageFormat;
 use lambda_runtime::{error::HandlerError, lambda, Context};
-use image::GenericImageView;
-use s3_service::{ResizerInput, Client};
+use s3_service::{Client, ResizerInput};
 
 fn main() -> Result<(), Error> {
     simple_logger::init_with_level(log::Level::Info)?;

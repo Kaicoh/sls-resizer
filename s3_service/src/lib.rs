@@ -1,8 +1,8 @@
 use failure::Error;
 use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, S3};
+use serde_derive::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
-use serde_derive::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResizerInput {
