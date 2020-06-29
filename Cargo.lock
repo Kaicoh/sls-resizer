@@ -291,6 +291,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "cropper"
+version = "0.1.0"
+dependencies = [
+ "failure",
+ "futures 0.3.5",
+ "image",
+ "lambda_runtime",
+ "log",
+ "rusoto_core",
+ "rusoto_s3",
+ "serde",
+ "serde_derive",
+ "simple_logger",
+ "tokio 0.2.21",
+]
+
+[[package]]
 name = "crossbeam-deque"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -829,6 +846,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c398b2b113b55809ceb9ee3e753fcbac793f1956663f3c36549c1346015c2afe"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "initiator"
+version = "0.1.0"
+dependencies = [
+ "aws_lambda_events",
+ "failure",
+ "futures 0.3.5",
+ "lambda_runtime",
+ "log",
+ "rusoto_core",
+ "rusoto_stepfunctions",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "simple-error",
+ "simple_logger",
+ "tokio 0.2.21",
 ]
 
 [[package]]
@@ -1464,10 +1500,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "resizer-service"
+name = "resizer"
 version = "0.1.0"
 dependencies = [
- "aws_lambda_events",
  "failure",
  "futures 0.3.5",
  "image",
@@ -1475,7 +1510,8 @@ dependencies = [
  "log",
  "rusoto_core",
  "rusoto_s3",
- "simple-error",
+ "serde",
+ "serde_derive",
  "simple_logger",
  "tokio 0.2.21",
 ]
@@ -1568,6 +1604,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusoto_stepfunctions"
+version = "0.44.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f95a85dff3eca88baa35d385e093711a8c74b4ecab200d2744c22c7f1246fe4"
+dependencies = [
+ "async-trait",
+ "bytes 0.5.5",
+ "futures 0.3.5",
+ "rusoto_core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "rust-argon2"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1605,6 +1655,18 @@ name = "safemem"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef703b7cb59335eae2eb93ceb664c0eb7ea6bf567079d843e09420219668e072"
+
+[[package]]
+name = "saver"
+version = "0.1.0"
+dependencies = [
+ "failure",
+ "lambda_runtime",
+ "log",
+ "serde",
+ "serde_derive",
+ "simple_logger",
+]
 
 [[package]]
 name = "schannel"

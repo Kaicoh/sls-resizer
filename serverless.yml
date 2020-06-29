@@ -1,24 +1,4 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: resizer-service
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
 
 provider:
   name: aws
@@ -26,42 +6,29 @@ provider:
   memorySize: 128
   profile: kanji
   region: ap-northeast-1
-  iamRoleStatements:
-   - Effect: "Allow"
-     Action:
-       - "s3:ListBucket"
-       - "s3:GetObject"
-       - "s3:PutObject"
-     Resource: "arn:aws:s3:::resizer-service-images-kaicoh/*"
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
 plugins:
   - serverless-rust
+  - serverless-step-functions
+  - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
 
-# you can add packaging information here
 package:
   individually: true
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
+
+
+iamRoleForS3: &iamRoleForS3
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+        - "s3:GetObject"
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::resizer-service-images-kaicoh/*"
 
 functions:
-  resizer:
-    handler: resizer-service
+  initiator:
+    handler: initiator
     events:
       - s3:
           bucket: resizer-service-images-kaicoh
@@ -69,54 +36,53 @@ functions:
           rules:
             - prefix: uploads/
             - suffix: .jpg
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - websocket: $connect
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-#      - alb:
-#          listenerArn: arn:aws:elasticloadbalancing:us-east-1:XXXXXX:listener/app/my-load-balancer/50dc6c495c0c9188/
-#          priority: 1
-#          conditions:
-#            host: example.com
-#            path: /hello
+    iamRoleStatementsName: execute-step-functions
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "states:ListStateMachines"
+          - "states:StartExecution"
+        Resource: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:*
+  resizer:
+    handler: resizer
+    iamRoleStatementsName: handle-s3-objects-for-resizer
+    <<: *iamRoleForS3
+  cropper:
+    handler: cropper
+    iamRoleStatementsName: handle-s3-objects-for-cropper
+    <<: *iamRoleForS3
+  saver:
+    handler: saver
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+stepFunctions:
+  stateMachines:
+    imageProcessing:
+      definition:
+        Comment: "Image processing state machine"
+        StartAt: Parallel
+        States:
+          Parallel:
+            Type: Parallel
+            Next: FinalState
+            Branches:
+              - StartAt: ResizeImage
+                States:
+                  ResizeImage:
+                    Type: Task
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-resizer
+                    End: true
+              - StartAt: SaveImageMetadata
+                States:
+                  SaveImageMetadata:
+                    Type: Task
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-saver
+                    End: true
+              - StartAt: CropImage
+                States:
+                  CropImage:
+                    Type: Task
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-cropper
+                    End: true
+          FinalState:
+            Type: Pass
+            End: true

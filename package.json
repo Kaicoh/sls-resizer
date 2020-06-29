@@ -6,6 +6,9 @@
   "license": "MIT",
   "devDependencies": {
     "serverless": "^1.74.0",
-    "serverless-rust": "^0.3.8"
+    "serverless-iam-roles-per-function": "^2.0.2",
+    "serverless-pseudo-parameters": "^2.5.0",
+    "serverless-rust": "^0.3.8",
+    "serverless-step-functions": "^2.21.1"
   }
 }

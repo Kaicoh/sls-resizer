@@ -1,12 +1,16 @@
-use aws_lambda_events::event::s3::S3Event;
 use failure::Error;
 use image::ImageFormat;
 use lambda_runtime::{error::HandlerError, lambda, Context};
-use log::error;
 use rusoto_core::Region;
 use rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, S3};
-use simple_error::bail;
 use tokio::io::AsyncReadExt;
+use serde_derive::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct ResizerInput {
+    bucket: String,
+    key: String,
+}
 
 fn main() -> Result<(), Error> {
     simple_logger::init_with_level(log::Level::Info)?;
@@ -14,15 +18,9 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn handler(e: S3Event, _: Context) -> Result<(), HandlerError> {
-    if e.records.is_empty() {
-        error!("Empty records");
-        bail!("Empty records");
-    }
-
-    let record = e.records[0].clone();
-    let bucket = record.s3.bucket.name.unwrap();
-    let key = record.s3.object.key.unwrap();
+fn handler(e: ResizerInput, _: Context) -> Result<(), HandlerError> {
+    let bucket = e.bucket;
+    let key = e.key;
     let new_key = key.replace("uploads/", "thumbnails/");
 
     let client = Client::new();
