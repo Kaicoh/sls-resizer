@@ -1,13 +1,7 @@
 use failure::Error;
 use lambda_runtime::{error::HandlerError, lambda, Context};
-use serde_derive::Deserialize;
 use log::info;
-
-#[derive(Deserialize, Debug)]
-struct ResizerInput {
-    bucket: String,
-    key: String,
-}
+use s3_service::ResizerInput;
 
 fn main() -> Result<(), Error> {
     simple_logger::init_with_level(log::Level::Info)?;

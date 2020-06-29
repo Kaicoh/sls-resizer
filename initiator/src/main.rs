@@ -4,13 +4,7 @@ use lambda_runtime::{error::HandlerError, lambda, Context};
 use rusoto_core::Region;
 use rusoto_stepfunctions::{StepFunctionsClient, StepFunctions, ListStateMachinesInput, StartExecutionInput};
 use simple_error::bail;
-use serde_derive::Serialize;
-
-#[derive(Serialize)]
-struct ResizerInput {
-    bucket: String,
-    key: String,
-}
+use s3_service::ResizerInput;
 
 fn main() -> Result<(), Error> {
     simple_logger::init_with_level(log::Level::Info)?;

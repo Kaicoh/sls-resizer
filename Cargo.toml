@@ -1,2 +1,2 @@
 [workspace]
-members = ["initiator", "resizer", "saver", "cropper"]
+members = ["initiator", "resizer", "saver", "cropper", "s3_service"]

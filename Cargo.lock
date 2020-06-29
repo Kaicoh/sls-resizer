@@ -295,16 +295,11 @@ name = "cropper"
 version = "0.1.0"
 dependencies = [
  "failure",
- "futures 0.3.5",
  "image",
  "lambda_runtime",
  "log",
- "rusoto_core",
- "rusoto_s3",
- "serde",
- "serde_derive",
+ "s3_service",
  "simple_logger",
- "tokio 0.2.21",
 ]
 
 [[package]]
@@ -859,8 +854,8 @@ dependencies = [
  "log",
  "rusoto_core",
  "rusoto_stepfunctions",
+ "s3_service",
  "serde",
- "serde_derive",
  "serde_json",
  "simple-error",
  "simple_logger",
@@ -1504,16 +1499,11 @@ name = "resizer"
 version = "0.1.0"
 dependencies = [
  "failure",
- "futures 0.3.5",
  "image",
  "lambda_runtime",
  "log",
- "rusoto_core",
- "rusoto_s3",
- "serde",
- "serde_derive",
+ "s3_service",
  "simple_logger",
- "tokio 0.2.21",
 ]
 
 [[package]]
@@ -1651,6 +1641,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
+name = "s3_service"
+version = "0.1.0"
+dependencies = [
+ "failure",
+ "futures 0.3.5",
+ "rusoto_core",
+ "rusoto_s3",
+ "serde",
+ "serde_derive",
+ "tokio 0.2.21",
+]
+
+[[package]]
 name = "safemem"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1663,8 +1666,7 @@ dependencies = [
  "failure",
  "lambda_runtime",
  "log",
- "serde",
- "serde_derive",
+ "s3_service",
  "simple_logger",
 ]
 
