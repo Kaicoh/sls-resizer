@@ -1,11 +1,18 @@
 service: resizer-service
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  settings:
+    IMAGE_METADATA_TABLE: ImageMetaData-${self:custom.stage}
+
 provider:
   name: aws
   runtime: rust
   memorySize: 128
   profile: kanji
   region: ap-northeast-1
+  stage: dev
+  environment: ${self:custom.settings}
 
 plugins:
   - serverless-rust
@@ -16,15 +23,23 @@ plugins:
 package:
   individually: true
 
+iamRoleStatementsForS3: &iamRoleStatementsForS3
+  Effect: "Allow"
+  Action:
+    - "s3:ListBucket"
+    - "s3:GetObject"
+    - "s3:PutObject"
+  Resource: "arn:aws:s3:::resizer-service-images-kaicoh/*"
 
-iamRoleForS3: &iamRoleForS3
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "s3:ListBucket"
-        - "s3:GetObject"
-        - "s3:PutObject"
-      Resource: "arn:aws:s3:::resizer-service-images-kaicoh/*"
+iamRoleStatementsForDynamoDB: &iamRoleStatementsForDynamoDB
+  Effect: "Allow"
+  Action:
+    - "dynamodb:Query"
+    - "dynamodb:GetItem"
+    - "dynamodb:PutItem"
+    - "dynamodb:UpdateItem"
+    - "dynamodb:DeleteItem"
+  Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.settings.IMAGE_METADATA_TABLE}
 
 functions:
   initiator:
@@ -36,7 +51,7 @@ functions:
           rules:
             - prefix: uploads/
             - suffix: .jpg
-    iamRoleStatementsName: execute-step-functions
+    iamRoleStatementsName: iam-role-for-initiator
     iamRoleStatements:
       - Effect: "Allow"
         Action:
@@ -45,14 +60,20 @@ functions:
         Resource: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:*
   resizer:
     handler: resizer
-    iamRoleStatementsName: handle-s3-objects-for-resizer
-    <<: *iamRoleForS3
+    iamRoleStatementsName: iam-role-for-resizer
+    iamRoleStatements:
+      - <<: *iamRoleStatementsForS3
   cropper:
     handler: cropper
-    iamRoleStatementsName: handle-s3-objects-for-cropper
-    <<: *iamRoleForS3
+    iamRoleStatementsName: iam-role-for-cropper
+    iamRoleStatements:
+      - <<: *iamRoleStatementsForS3
   saver:
     handler: saver
+    iamRoleStatementsName: iam-role-for-savor
+    iamRoleStatements:
+      - <<: *iamRoleStatementsForS3
+      - <<: *iamRoleStatementsForDynamoDB
 
 stepFunctions:
   stateMachines:
@@ -69,20 +90,34 @@ stepFunctions:
                 States:
                   ResizeImage:
                     Type: Task
-                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-resizer
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-resizer
                     End: true
               - StartAt: SaveImageMetadata
                 States:
                   SaveImageMetadata:
                     Type: Task
-                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-saver
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-saver
                     End: true
               - StartAt: CropImage
                 States:
                   CropImage:
                     Type: Task
-                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-cropper
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-cropper
                     End: true
           FinalState:
             Type: Pass
             End: true
+
+resources:
+  Resources:
+    ImageMetaDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: ImageId
+          AttributeType: S
+        KeySchema:
+        - AttributeName: ImageId
+          KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.settings.IMAGE_METADATA_TABLE}
