@@ -1,5 +1,5 @@
 [package]
-name = "saver"
+name = "dynamodb_service"
 version = "0.1.0"
 authors = ["Kanji Tanaka <sumireminami@gmail.com>"]
 edition = "2018"
@@ -7,9 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lambda_runtime = "0.2.1"
-log = "0.4.8"
-simple_logger = "1.6.0"
+rusoto_core = "0.44"
+rusoto_dynamodb = "0.44"
+tokio = "0.2"
+futures = "0.3"
 failure = "0.1.8"
-s3_service = { path = "../s3_service" }
-dynamodb_service = { path = "../dynamodb_service" }

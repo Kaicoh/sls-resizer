@@ -407,6 +407,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 
 [[package]]
+name = "dynamodb_service"
+version = "0.1.0"
+dependencies = [
+ "failure",
+ "futures 0.3.5",
+ "rusoto_core",
+ "rusoto_dynamodb",
+ "tokio 0.2.21",
+]
+
+[[package]]
 name = "either"
 version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1556,6 +1567,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusoto_dynamodb"
+version = "0.44.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a485bf81a63fd92a4e011b76daed2731b363a6f2b6279b8b26b389699bcf1525"
+dependencies = [
+ "async-trait",
+ "bytes 0.5.5",
+ "futures 0.3.5",
+ "rusoto_core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "rusoto_s3"
 version = "0.44.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1663,6 +1688,7 @@ checksum = "ef703b7cb59335eae2eb93ceb664c0eb7ea6bf567079d843e09420219668e072"
 name = "saver"
 version = "0.1.0"
 dependencies = [
+ "dynamodb_service",
  "failure",
  "lambda_runtime",
  "log",
