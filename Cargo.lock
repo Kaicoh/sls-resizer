@@ -2016,6 +2016,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "thumb_saver"
+version = "0.1.0"
+dependencies = [
+ "aws_lambda_events",
+ "dynamodb_service",
+ "failure",
+ "lambda_runtime",
+ "log",
+ "simple-error",
+ "simple_logger",
+]
+
+[[package]]
 name = "tiff"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

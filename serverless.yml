@@ -72,7 +72,18 @@ functions:
     handler: saver
     iamRoleStatementsName: iam-role-for-savor
     iamRoleStatements:
-      - <<: *iamRoleStatementsForS3
+      - <<: *iamRoleStatementsForDynamoDB
+  thumb_saver:
+    handler: thumb_saver
+    events:
+      - s3:
+          bucket: resizer-service-images-kaicoh
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: thumbnails/
+            - suffix: .jpg
+    iamRoleStatementsName: iam-role-for-thumb-savor
+    iamRoleStatements:
       - <<: *iamRoleStatementsForDynamoDB
 
 stepFunctions:
